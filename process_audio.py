@@ -25,7 +25,7 @@ def is_video_file(filepath):
     _, ext = os.path.splitext(filepath)
     return ext.lower() in video_extensions
 
-def convert_video_to_mp3(video_path, output_dir=None, progress_queue=None):
+def convert_video_to_mp3(video_path, output_dir=None, progress_queue=None, audio_stream=0):
     """Converts a video file to an MP3 audio file using ffmpeg."""
     if not os.path.isfile(video_path):
         error_msg = f"Error: Input video file '{video_path}' not found."
@@ -48,7 +48,7 @@ def convert_video_to_mp3(video_path, output_dir=None, progress_queue=None):
     print(status_msg)
     
     try:
-        cmd = ["ffmpeg", "-i", video_path, "-q:a", "0", "-map", "0:a:0", "-vn", mp3_path, "-y"]
+        cmd = ["ffmpeg", "-i", video_path, "-q:a", "0", "-map", f"0:a:{audio_stream}", "-vn", mp3_path, "-y"]
         if sys.platform == 'win32':
              creation_flags = subprocess.CREATE_NO_WINDOW
         else:
@@ -98,6 +98,7 @@ def run_pipeline(params, progress_queue=None, control_queue=None):
     audio_chunks_dir = params.get('audio_chunks_dir', None)
     max_workers = params.get('max_workers', DEFAULT_MAX_WORKERS)
     skip_existing = params.get('skip_existing', True)
+    audio_stream = params.get('audio_stream', 0)
 
     if not input_file or not os.path.isfile(input_file):
         error_msg = f"Error: Input file '{input_file}' does not exist."
@@ -127,7 +128,7 @@ def run_pipeline(params, progress_queue=None, control_queue=None):
         print(start_msg)
         
         convert_start = time.time()
-        mp3_path = convert_video_to_mp3(input_file, output_dir, progress_queue)
+        mp3_path = convert_video_to_mp3(input_file, output_dir, progress_queue, audio_stream)
         
         if not mp3_path or not os.path.isfile(mp3_path):
             error_msg = "Error: Video to MP3 conversion failed. Cannot continue."
@@ -293,7 +294,8 @@ def main():
     parser.add_argument("--max-workers", type=int, default=DEFAULT_MAX_WORKERS)
     parser.add_argument("--no-skip-existing", action="store_false", dest="skip_existing")
     parser.add_argument("--cleanup", action="store_true")
-    
+    parser.add_argument("--audio-stream", type=int, default=0, help="Audio stream index to extract (default: 0, the first audio stream)")
+
     args = parser.parse_args()
     params = vars(args)
     params['input_audio'] = params.pop('input_file')
