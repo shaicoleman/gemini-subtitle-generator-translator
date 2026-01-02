@@ -15,9 +15,10 @@ MAX_RETRIES = 5
 INITIAL_DELAY = 2
 DEFAULT_MODEL = "gemini-3-flash-preview"
 DEFAULT_MAX_WORKERS = 5
+SUPPORTED_AUDIO_EXTENSIONS = ('.mp3', '.wav', '.aiff', '.aif', '.aac', '.m4a', '.ogg', '.flac')
 # ---------------------
 
-def get_system_instruction(target_language="Simplified Chinese"):
+def get_system_instruction(target_language="English"):
     return f"""You are an expert transcription engine powered by Gemini 3.0.
 Task:
 1.  **Transcribe** the audio verbatim in its original language.
@@ -126,13 +127,13 @@ def run_transcription(api_key, audio_dir, intermediate_dir, system_instruction, 
     pathlib.Path(intermediate_dir).mkdir(parents=True, exist_ok=True)
     
     try:
-        audio_files = sorted([os.path.join(audio_dir, f) for f in os.listdir(audio_dir) if f.endswith(".mp3")])
+        audio_files = sorted([os.path.join(audio_dir, f) for f in os.listdir(audio_dir) if f.lower().endswith(SUPPORTED_AUDIO_EXTENSIONS)])
     except FileNotFoundError:
         if progress_queue: progress_queue.put(f"Error: Audio directory not found at {audio_dir}")
         return False
 
     if not audio_files:
-        if progress_queue: progress_queue.put(f"No .mp3 files found in {audio_dir}")
+        if progress_queue: progress_queue.put(f"No audio files found in {audio_dir}")
         return False
 
     processed_count = 0

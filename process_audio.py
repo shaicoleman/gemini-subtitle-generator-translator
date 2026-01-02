@@ -92,7 +92,7 @@ def run_pipeline(params, progress_queue=None, control_queue=None):
     silence_length = params.get('silence_length', 500)
     silence_threshold = params.get('silence_threshold', -40)
     cleanup = params.get('cleanup', False)
-    target_language = params.get('target_language', 'Simplified Chinese')
+    target_language = params.get('target_language', 'English')
     model_name = params.get('model_name', 'gemini-3-flash-preview')
     skip_split = params.get('skip_split', False)
     audio_chunks_dir = params.get('audio_chunks_dir', None)

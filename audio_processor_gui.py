@@ -164,7 +164,7 @@ class AudioProcessorGUI(tk.Tk):
         self.output_dir_path = tk.StringVar()
         self.api_key = tk.StringVar()
         self.content_choice = tk.StringVar(value="both")
-        self.target_language = tk.StringVar(value="Simplified Chinese")
+        self.target_language = tk.StringVar(value="English")
         self.max_length = tk.IntVar(value=300)
         self.silence_length = tk.IntVar(value=500)
         self.silence_threshold = tk.IntVar(value=-40)
@@ -373,8 +373,8 @@ class AudioProcessorGUI(tk.Tk):
         """Open a file browser to select an input file."""
         lang = self.current_language.get()
         filetypes = (
-            ("All supported files", "*.mp3 *.wav *.flac *.m4a *.aac *.ogg *.mp4 *.avi *.mkv *.mov *.wmv *.flv *.webm *.m4v"),
-            ("Audio files", "*.mp3 *.wav *.flac *.m4a *.aac *.ogg"),
+            ("All supported files", "*.mp3 *.wav *.flac *.m4a *.aac *.ogg *.aiff *.aif *.mp4 *.avi *.mkv *.mov *.wmv *.flv *.webm *.m4v"),
+            ("Audio files", "*.mp3 *.wav *.flac *.m4a *.aac *.ogg *.aiff *.aif"),
             ("Video files", "*.mp4 *.avi *.mkv *.mov *.wmv *.flv *.webm *.m4v"),
             ("All files", "*.*")
         )

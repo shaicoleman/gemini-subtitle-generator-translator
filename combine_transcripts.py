@@ -21,6 +21,8 @@ CHARS_PER_SECOND = 14
 GAP_BETWEEN_SUBS = 0.05  
 # ---------------------
 
+SUPPORTED_AUDIO_EXTENSIONS = ('.mp3', '.wav', '.aiff', '.aif', '.aac', '.m4a', '.ogg', '.flac')
+
 def get_audio_duration(filepath):
     """Robust duration checker."""
     if HAS_MUTAGEN:
@@ -29,6 +31,7 @@ def get_audio_duration(filepath):
                 return MP3(filepath).info.length
             elif filepath.lower().endswith('.wav'):
                 return WAVE(filepath).info.length
+            # For other formats, fall through to ffprobe
         except Exception:
             pass 
 
@@ -167,7 +170,7 @@ def generate_srt(transcript_dir, audio_dir, output_srt_file, content_choice='bot
     # 1. Get Audio Files
     try:
         audio_files = sorted(
-            [f for f in os.listdir(audio_dir) if f.endswith('.mp3')],
+            [f for f in os.listdir(audio_dir) if f.lower().endswith(SUPPORTED_AUDIO_EXTENSIONS)],
             key=lambda x: int(re.findall(r'\d+', x)[-1]) if re.findall(r'\d+', x) else 0
         )
     except Exception as e:

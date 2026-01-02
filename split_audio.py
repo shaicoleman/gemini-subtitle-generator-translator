@@ -132,22 +132,40 @@ def split_audio(input_file, output_dir, max_chunk_length=MAX_CHUNK_LENGTH_SEC * 
     split_points_sec.append(total_length_sec)
 
     # Check input extension to decide encoding strategy
+    # Gemini supports: WAV, MP3, AIFF, AAC, OGG, FLAC
     _, ext = os.path.splitext(input_file)
-    is_mp3_input = ext.lower() == '.mp3'
-    
+    ext_lower = ext.lower()
+
+    # Map extensions to their output format and whether stream copy is possible
+    supported_formats = {
+        '.mp3': ('mp3', True),
+        '.wav': ('wav', True),
+        '.aiff': ('aiff', True),
+        '.aif': ('aiff', True),
+        '.aac': ('aac', True),
+        '.m4a': ('m4a', True),  # AAC in M4A container
+        '.ogg': ('ogg', True),
+        '.flac': ('flac', True),
+    }
+
+    if ext_lower in supported_formats:
+        output_ext, can_stream_copy = supported_formats[ext_lower]
+    else:
+        output_ext, can_stream_copy = 'mp3', False
+
     for i, end_time_sec in enumerate(split_points_sec):
         if end_time_sec <= start_time_sec + 0.1:
             continue
 
-        chunk_filename = os.path.join(output_dir, f"chunk_{i+1:03d}.mp3")
+        chunk_filename = os.path.join(output_dir, f"chunk_{i+1:03d}.{output_ext}")
         duration_sec = end_time_sec - start_time_sec
 
         msg = f"Exporting chunk {i+1}/{len(split_points_sec)}: {start_time_sec:.2f}s - {end_time_sec:.2f}s -> {os.path.basename(chunk_filename)}"
         if progress_queue: progress_queue.put(msg)
         print(msg)
 
-        # Construct command: Re-encode if not MP3, copy if MP3
-        if is_mp3_input:
+        # Use stream copy for supported formats, re-encode otherwise
+        if can_stream_copy:
             codec_args = ['-c', 'copy']
         else:
             # Re-encode to standard MP3 (compatible with Gemini)
