@@ -38,7 +38,7 @@ translations = {
         "content_type": "Subtitle Content:",
         "content_desc": "(transcript: Transcription only, translation: Translation only, both: Both)",
         "target_language": "Target Translation Language:",
-        "max_length": "Max Segment Length (sec):",
+        "max_chunk_length": "Max Chunk Length (sec):",
         "silence_length": "Silence Detection Length (ms):",
         "silence_threshold": "Silence Threshold (dB):",
         "first_chunk_offset": "First Segment Offset (sec):",
@@ -99,7 +99,7 @@ translations = {
         "content_type": "字幕内容:",
         "content_desc": "(transcript:仅转录, translation:仅翻译, both:两者)",
         "target_language": "翻译目标语言:",
-        "max_length": "最大片段长度(秒):",
+        "max_chunk_length": "最大片段长度(秒):",
         "silence_length": "静音检测长度(毫秒):",
         "silence_threshold": "静音阈值(dB):",
         "first_chunk_offset": "首个片段偏移(秒):",
@@ -165,7 +165,7 @@ class AudioProcessorGUI(tk.Tk):
         self.api_key = tk.StringVar()
         self.content_choice = tk.StringVar(value="both")
         self.target_language = tk.StringVar(value="English")
-        self.max_length = tk.IntVar(value=300)
+        self.max_chunk_length = tk.IntVar(value=300)
         self.silence_length = tk.IntVar(value=500)
         self.silence_threshold = tk.IntVar(value=-40)
         self.first_chunk_offset = tk.DoubleVar(value=0.0)
@@ -265,7 +265,7 @@ class AudioProcessorGUI(tk.Tk):
         self.ui_elements["target_lang_label"] = ttk.Label(params_frame)
         self.ui_elements["target_lang_label"].grid(row=1, column=0, sticky=tk.W, pady=5)
         target_lang_combo = ttk.Combobox(params_frame, textvariable=self.target_language, width=15)
-        target_lang_combo['values'] = ('Simplified Chinese', 'Traditional Chinese', 'English', 'Japanese', 'Korean', 'Russian', 'Spanish', 'French', 'German')
+        target_lang_combo['values'] = ('English', 'Simplified Chinese', 'Traditional Chinese', 'Japanese', 'Korean', 'Russian', 'Spanish', 'French', 'German')
         target_lang_combo.current(0)
         target_lang_combo.grid(row=1, column=1, sticky=tk.W, pady=5)
 
@@ -288,9 +288,9 @@ class AudioProcessorGUI(tk.Tk):
         self.ui_elements["parallel_spinbox"].grid(row=2, column=3, sticky=tk.W, pady=5)
 
         # Audio splitting parameters
-        self.ui_elements["max_length_label"] = ttk.Label(params_frame)
-        self.ui_elements["max_length_label"].grid(row=3, column=0, sticky=tk.W, pady=5)
-        ttk.Spinbox(params_frame, from_=60, to=900, increment=30, textvariable=self.max_length, width=5).grid(row=3, column=1, sticky=tk.W, pady=5)
+        self.ui_elements["max_chunk_length_label"] = ttk.Label(params_frame)
+        self.ui_elements["max_chunk_length_label"].grid(row=3, column=0, sticky=tk.W, pady=5)
+        ttk.Spinbox(params_frame, from_=60, to=900, increment=30, textvariable=self.max_chunk_length, width=5).grid(row=3, column=1, sticky=tk.W, pady=5)
         
         self.ui_elements["silence_length_label"] = ttk.Label(params_frame)
         self.ui_elements["silence_length_label"].grid(row=4, column=0, sticky=tk.W, pady=5)
@@ -435,7 +435,7 @@ class AudioProcessorGUI(tk.Tk):
             'api_key': self.api_key.get(),
             'content': self.content_choice.get(),
             'target_language': self.target_language.get(),
-            'max_length': self.max_length.get(),
+            'max_chunk_length': self.max_chunk_length.get(),
             'silence_length': self.silence_length.get(),
             'silence_threshold': self.silence_threshold.get(),
             'first_chunk_offset': self.first_chunk_offset.get(),
@@ -692,7 +692,7 @@ class AudioProcessorGUI(tk.Tk):
         self.ui_elements["content_label"].config(text=translations[lang]["content_type"])
         self.ui_elements["content_desc_label"].config(text=translations[lang]["content_desc"])
         self.ui_elements["target_lang_label"].config(text=translations[lang]["target_language"])
-        self.ui_elements["max_length_label"].config(text=translations[lang]["max_length"])
+        self.ui_elements["max_chunk_length_label"].config(text=translations[lang]["max_chunk_length"])
         self.ui_elements["silence_length_label"].config(text=translations[lang]["silence_length"])
         self.ui_elements["silence_threshold_label"].config(text=translations[lang]["silence_threshold"])
         self.ui_elements["first_chunk_offset_label"].config(text=translations[lang]["first_chunk_offset"])

@@ -215,14 +215,14 @@ def main():
     parser = argparse.ArgumentParser(description="Splits a long audio file into smaller chunks using ffmpeg.")
     parser.add_argument("-i", "--input", required=True, help="Input audio file path.")
     parser.add_argument("-o", "--output-dir", default=OUTPUT_DIR, help=f"Output directory (default: {OUTPUT_DIR}).")
-    parser.add_argument("-m", "--max-length", type=int, default=MAX_CHUNK_LENGTH_SEC, help=f"Max chunk length in seconds (default: {MAX_CHUNK_LENGTH_SEC}).")
+    parser.add_argument("-m", "--max-chunk-length", type=int, default=MAX_CHUNK_LENGTH_SEC, help=f"Max chunk length in seconds (default: {MAX_CHUNK_LENGTH_SEC}).")
     parser.add_argument("-s", "--silence-length", type=int, default=int(MIN_SILENCE_LENGTH_SEC * 1000), help=f"Min silence length in milliseconds (default: {int(MIN_SILENCE_LENGTH_SEC * 1000)}).")
     parser.add_argument("-t", "--silence-threshold", type=int, default=SILENCE_THRESH_DB, help=f"Silence threshold in dB (default: {SILENCE_THRESH_DB}).")
     args = parser.parse_args()
 
     start_time = time.time()
     split_audio(args.input, args.output_dir,
-                max_chunk_length=args.max_length * 1000,
+                max_chunk_length=args.max_chunk_length * 1000,
                 min_silence_len=args.silence_length,
                 silence_thresh=args.silence_threshold)
     end_time = time.time()

@@ -88,7 +88,7 @@ def run_pipeline(params, progress_queue=None, control_queue=None):
     api_key = params.get('api_key')
     content = params.get('content', 'both')
     first_chunk_offset = params.get('first_chunk_offset', 0.0)
-    max_length = params.get('max_length', 300)
+    max_chunk_length = params.get('max_chunk_length', 300)
     silence_length = params.get('silence_length', 500)
     silence_threshold = params.get('silence_threshold', -40)
     cleanup = params.get('cleanup', False)
@@ -151,7 +151,7 @@ def run_pipeline(params, progress_queue=None, control_queue=None):
     
     # Step 1: Split Audio
     if not skip_split:
-        start_msg = f"\n--- Step 1: Splitting Audio (Max: {max_length}s) ---"
+        start_msg = f"\n--- Step 1: Splitting Audio (Max: {max_chunk_length}s) ---"
         if progress_queue: progress_queue.put(start_msg)
         print(start_msg)
         
@@ -160,7 +160,7 @@ def run_pipeline(params, progress_queue=None, control_queue=None):
             chunk_files = split_audio(
                 input_audio, 
                 audio_chunk_dir, 
-                max_chunk_length=max_length * 1000,
+                max_chunk_length=max_chunk_length * 1000,
                 min_silence_len=silence_length,
                 silence_thresh=silence_threshold,
                 progress_queue=progress_queue
@@ -279,22 +279,19 @@ def main():
     parser.add_argument("input_file", help="Path to the input audio or video file.")
     parser.add_argument("--api-key", default=os.environ.get("GEMINI_API_KEY"), help="Your Google AI API key. Defaults to GEMINI_API_KEY environment variable.")
     parser.add_argument("--output-dir", help="Specify the output directory.")
-    parser.add_argument("--target-language", default="Simplified Chinese")
-    parser.add_argument("--content", choices=['transcript', 'translation', 'both'], default='both')
-    parser.add_argument("--max-length", type=int, default=300)
-    parser.add_argument("--silence-length", type=int, default=500)
-    parser.add_argument("--silence-threshold", type=int, default=-40)
-    parser.add_argument("--first-chunk-offset", type=float, default=0.0)
-    
-    # Updated default to Gemini 3.0 Pro Preview
-    parser.add_argument("--model-name", default="gemini-3-flash-preview", help="gemini-3-flash-preview, gemini-3-pro-preview, or gemini-2.5-flash")
-    
-    parser.add_argument("--skip-split", action="store_true")
-    parser.add_argument("--audio-chunks-dir")
-    parser.add_argument("--max-workers", type=int, default=DEFAULT_MAX_WORKERS)
-    parser.add_argument("--no-skip-existing", action="store_false", dest="skip_existing")
-    parser.add_argument("--cleanup", action="store_true")
-    parser.add_argument("--audio-stream", type=int, default=0, help="Audio stream index to extract (default: 0, the first audio stream)")
+    parser.add_argument("--target-language", default="English", help="Target language for translation (default: English)")
+    parser.add_argument("--content", choices=['transcript', 'translation', 'both'], default='both', help="Output content type (default: both)")
+    parser.add_argument("--max-chunk-length", type=int, default=300, help="Maximum audio chunk length in seconds (default: 300)")
+    parser.add_argument("--silence-length", type=int, default=500, help="Minimum silence length in ms for splitting (default: 500)")
+    parser.add_argument("--silence-threshold", type=int, default=-40, help="Silence threshold in dB (default: -40)")
+    parser.add_argument("--first-chunk-offset", type=float, default=0.0, help="Time offset for first chunk in seconds (default: 0.0)")
+    parser.add_argument("--model-name", default="gemini-3-flash-preview", help="Gemini model to use (default: gemini-3-flash-preview)")
+    parser.add_argument("--skip-split", action="store_true", help="Skip audio splitting step")
+    parser.add_argument("--audio-chunks-dir", help="Directory containing pre-split audio chunks")
+    parser.add_argument("--max-workers", type=int, default=DEFAULT_MAX_WORKERS, help=f"Maximum parallel workers for API calls (default: {DEFAULT_MAX_WORKERS})")
+    parser.add_argument("--no-skip-existing", action="store_false", dest="skip_existing", help="Re-process chunks even if output exists")
+    parser.add_argument("--cleanup", action="store_true", help="Remove intermediate files after processing")
+    parser.add_argument("--audio-stream", type=int, default=0, help="Audio stream index to extract from video (default: 0)")
 
     args = parser.parse_args()
     params = vars(args)
