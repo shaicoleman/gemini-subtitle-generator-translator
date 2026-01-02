@@ -1,5 +1,6 @@
 import os
-import google.generativeai as genai
+from google import genai
+from google.genai import types
 import time
 import pathlib
 import random
@@ -12,7 +13,7 @@ AUDIO_DIR = "audio_chunks"
 INTERMEDIATE_DIR = "intermediate_transcripts"
 MAX_RETRIES = 5
 INITIAL_DELAY = 2
-DEFAULT_MODEL = "gemini-3-pro-preview" # Updated to Gemini 3.0
+DEFAULT_MODEL = "gemini-3-flash-preview"
 DEFAULT_MAX_WORKERS = 5
 # ---------------------
 
@@ -51,13 +52,13 @@ Timestamped Translation:
 def initialize_genai_client(api_key):
     """Initializes the GenAI client."""
     try:
-        genai.configure(api_key=api_key)
-        return True
+        client = genai.Client(api_key=api_key)
+        return client
     except Exception as e:
         print(f"Error initializing GenAI client: {e}")
         return None
 
-def process_audio_file(filepath, intermediate_dir, system_instruction, model_name):
+def process_audio_file(filepath, intermediate_dir, system_instruction, model_name, client):
     """Processes a single audio file: uploads, transcribes, and saves the result."""
     filename = os.path.basename(filepath)
     transcript_filename = pathlib.Path(filename).stem + ".txt"
@@ -66,38 +67,39 @@ def process_audio_file(filepath, intermediate_dir, system_instruction, model_nam
     for attempt in range(MAX_RETRIES):
         try:
             print(f"  Uploading {filename} (Attempt {attempt + 1}/{MAX_RETRIES})...")
-            # Gemini 3.0 uses the standard File API
-            audio_file = genai.upload_file(path=filepath)
-            
+            # Upload file using the new client API
+            audio_file = client.files.upload(file=filepath)
+
             # Wait for processing to complete (important for large files)
             while audio_file.state.name == "PROCESSING":
                 time.sleep(1)
-                audio_file = genai.get_file(audio_file.name)
-            
+                audio_file = client.files.get(name=audio_file.name)
+
             if audio_file.state.name == "FAILED":
                 raise ValueError("Audio file upload failed processing.")
 
             print(f"  Transcribing {filename} with model {model_name}...")
-            
+
             # Low temperature for deterministic timestamps
-            generation_config = genai.types.GenerationConfig(
+            generation_config = types.GenerateContentConfig(
+                system_instruction=system_instruction,
                 temperature=0.2
             )
-            
-            model = genai.GenerativeModel(model_name=model_name, system_instruction=system_instruction)
-            response = model.generate_content(
-                ["Please process this audio file strictly according to the system instructions.", audio_file],
-                generation_config=generation_config
+
+            response = client.models.generate_content(
+                model=model_name,
+                contents=["Please process this audio file strictly according to the system instructions.", audio_file],
+                config=generation_config
             )
-            
+
             # Handle potential "thinking" blocks in Gemini 3.0 if present, though .text usually extracts the final answer
             transcript = response.text
 
             with open(intermediate_filepath, "w", encoding="utf-8") as f:
                 f.write(transcript)
-            
+
             print(f"  Successfully processed and saved: {intermediate_filepath}")
-            genai.delete_file(audio_file.name)
+            client.files.delete(name=audio_file.name)
             return transcript
 
         except Exception as e:
@@ -116,7 +118,8 @@ def process_audio_file(filepath, intermediate_dir, system_instruction, model_nam
 
 def run_transcription(api_key, audio_dir, intermediate_dir, system_instruction, model_name=DEFAULT_MODEL, progress_queue=None, max_workers=DEFAULT_MAX_WORKERS, skip_existing=True):
     """Transcribes all audio files in a directory in parallel."""
-    if not initialize_genai_client(api_key):
+    client = initialize_genai_client(api_key)
+    if not client:
         if progress_queue: progress_queue.put("Failed to initialize GenAI client. Check API key.")
         return False
 
@@ -160,8 +163,8 @@ def run_transcription(api_key, audio_dir, intermediate_dir, system_instruction, 
                 success_count += 1
             update_progress(f"({processed_count}/{len(audio_files)}) Skipping existing valid transcript: {filename}")
             return "SKIPPED"
-        
-        result = process_audio_file(filepath, intermediate_dir, system_instruction, model_name)
+
+        result = process_audio_file(filepath, intermediate_dir, system_instruction, model_name, client)
         
         with count_lock:
             processed_count += 1
@@ -192,7 +195,7 @@ def run_transcription(api_key, audio_dir, intermediate_dir, system_instruction, 
 if __name__ == "__main__":
     import argparse
     parser = argparse.ArgumentParser(description="Transcribe audio files.")
-    parser.add_argument("--api-key", required=True, help="Google AI API key.")
+    parser.add_argument("--api-key", default=os.environ.get("GEMINI_API_KEY"), help="Google AI API key. Defaults to GEMINI_API_KEY environment variable.")
     parser.add_argument("--audio-dir", default=AUDIO_DIR)
     parser.add_argument("--intermediate-dir", default=INTERMEDIATE_DIR)
     parser.add_argument("--target-language", default="Simplified Chinese")

@@ -170,7 +170,7 @@ class AudioProcessorGUI(tk.Tk):
         self.silence_threshold = tk.IntVar(value=-40)
         self.first_chunk_offset = tk.DoubleVar(value=0.0)
         self.cleanup = tk.BooleanVar(value=False)
-        self.model_name = tk.StringVar(value="gemini-3-pro-preview")
+        self.model_name = tk.StringVar(value="gemini-3-flash-preview")
         self.skip_split = tk.BooleanVar(value=False)
         self.audio_chunks_dir = tk.StringVar()
         self.max_workers = tk.IntVar(value=DEFAULT_MAX_WORKERS)
@@ -275,8 +275,8 @@ class AudioProcessorGUI(tk.Tk):
         model_combo = ttk.Combobox(params_frame, textvariable=self.model_name, width=22)
         
         # Updated Model List for Gemini 3.0
-        model_combo['values'] = ('gemini-3-pro-preview', 'gemini-3-flash-preview', 'gemini-2.5-flash')
-        model_combo.current(0) # Default to gemini-3-pro-preview
+        model_combo['values'] = ('gemini-3-flash-preview', 'gemini-3-pro-preview', 'gemini-2.5-flash')
+        model_combo.current(0) # Default to gemini-3-flash-preview
         
         model_combo.grid(row=1, column=3, sticky=tk.W, pady=5)
         self.ui_elements["model_combo"] = model_combo

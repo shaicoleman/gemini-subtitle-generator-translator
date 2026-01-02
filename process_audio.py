@@ -93,7 +93,7 @@ def run_pipeline(params, progress_queue=None, control_queue=None):
     silence_threshold = params.get('silence_threshold', -40)
     cleanup = params.get('cleanup', False)
     target_language = params.get('target_language', 'Simplified Chinese')
-    model_name = params.get('model_name', 'gemini-3-pro-preview') # Default to Gemini 3.0
+    model_name = params.get('model_name', 'gemini-3-flash-preview')
     skip_split = params.get('skip_split', False)
     audio_chunks_dir = params.get('audio_chunks_dir', None)
     max_workers = params.get('max_workers', DEFAULT_MAX_WORKERS)
@@ -276,7 +276,7 @@ def run_pipeline(params, progress_queue=None, control_queue=None):
 def main():
     parser = argparse.ArgumentParser(description="A one-stop tool for audio/video transcription and subtitle generation.")
     parser.add_argument("input_file", help="Path to the input audio or video file.")
-    parser.add_argument("--api-key", required=True, help="Your Google AI API key.")
+    parser.add_argument("--api-key", default=os.environ.get("GEMINI_API_KEY"), help="Your Google AI API key. Defaults to GEMINI_API_KEY environment variable.")
     parser.add_argument("--output-dir", help="Specify the output directory.")
     parser.add_argument("--target-language", default="Simplified Chinese")
     parser.add_argument("--content", choices=['transcript', 'translation', 'both'], default='both')
@@ -286,7 +286,7 @@ def main():
     parser.add_argument("--first-chunk-offset", type=float, default=0.0)
     
     # Updated default to Gemini 3.0 Pro Preview
-    parser.add_argument("--model-name", default="gemini-3-pro-preview", help="gemini-3-pro-preview, gemini-3-flash-preview, or gemini-2.5-flash")
+    parser.add_argument("--model-name", default="gemini-3-flash-preview", help="gemini-3-flash-preview, gemini-3-pro-preview, or gemini-2.5-flash")
     
     parser.add_argument("--skip-split", action="store_true")
     parser.add_argument("--audio-chunks-dir")

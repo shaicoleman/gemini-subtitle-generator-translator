@@ -106,7 +106,7 @@ python process_audio.py 演讲.mp3 --api-key YOUR_API_KEY --output-dir ./输出�
   - `transcript`：仅包含转录
   - `translation`：仅包含翻译
   - `both`：同时包含转录和翻译 (默认)
-- `--model-name`：用于转录的 Gemini 模型 (默认: gemini-2.5-pro-preview-03-25)
+- `--model-name`：用于转录的 Gemini 模型 (默认: gemini-3-flash-preview)
 - `--max-length`：最大音频片段长度 (秒，默认 300)
 - `--silence-length`：静音检测的最小长度 (毫秒，默认 500)
 - `--silence-threshold`：静音检测阈值 (dB，默认 -40)
