@@ -48,7 +48,7 @@ def convert_video_to_mp3(video_path, output_dir=None, progress_queue=None):
     print(status_msg)
     
     try:
-        cmd = ["ffmpeg", "-i", video_path, "-q:a", "0", "-map", "a", "-vn", mp3_path, "-y"]
+        cmd = ["ffmpeg", "-i", video_path, "-q:a", "0", "-map", "0:a:0", "-vn", mp3_path, "-y"]
         if sys.platform == 'win32':
              creation_flags = subprocess.CREATE_NO_WINDOW
         else:
