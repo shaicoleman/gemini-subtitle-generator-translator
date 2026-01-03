@@ -208,7 +208,7 @@ if __name__ == "__main__":
     parser.add_argument("--api-key", default=os.environ.get("GEMINI_API_KEY"), help="Google AI API key. Defaults to GEMINI_API_KEY environment variable.")
     parser.add_argument("--audio-dir", default=AUDIO_DIR)
     parser.add_argument("--intermediate-dir", default=INTERMEDIATE_DIR)
-    parser.add_argument("--target-language", default="Simplified Chinese")
+    parser.add_argument("--target-language", default="English")
     parser.add_argument("--model-name", default=DEFAULT_MODEL)
     parser.add_argument("--max-workers", type=int, default=DEFAULT_MAX_WORKERS)
     args = parser.parse_args()
