@@ -19,7 +19,11 @@ DEFAULT_MAX_WORKERS = 5
 SUPPORTED_AUDIO_EXTENSIONS = ('.mp3', '.wav', '.aiff', '.aif', '.aac', '.m4a', '.ogg', '.flac')
 # ---------------------
 
-def get_system_instruction(target_language="English"):
+def get_system_instruction(target_language="English", content_choice="both"):
+    include_translation = content_choice in ("translation", "both")
+    extract_video_text_instruction = ""
+    if include_translation:
+        extract_video_text_instruction = "* Extract the text/subtitle that appear on the video as it is.\n"
     return f"""You are an expert transcription engine powered by Gemini 3.0.
 Task:
 1.  **Transcribe** the audio verbatim in its original language.
@@ -33,8 +37,7 @@ Task:
 * Do NOT use (MM:SS) or [MM:SS]. You MUST include milliseconds.
 * Output exactly four sections separated by blank lines.
 * Output the transcript and translation as is.
-* Do not include filler pauses (umm, uhh, err, ahh).
-* Extract the text/subtitle that appear on the video as it is.
+{extract_video_text_instruction}* Do not include filler pauses (umm, uhh, err, ahh).
 * Do not censor explicit language.
 
 **Strict Output Template:**

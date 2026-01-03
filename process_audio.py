@@ -188,7 +188,7 @@ def run_pipeline(params, progress_queue=None, control_queue=None):
     step2_start = time.time()
     try:
         from transcript import get_system_instruction
-        custom_system_instruction = get_system_instruction(target_language)
+        custom_system_instruction = get_system_instruction(target_language, content)
         
         transcription_success = run_transcription(
             api_key=api_key,
