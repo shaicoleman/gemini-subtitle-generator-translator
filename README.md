@@ -22,7 +22,7 @@ This is an integrated audio/video processing tool that can transcribe long audio
 - Python 3.10+
 - FFmpeg (for video processing)
 - Required Python libraries (see Installation section)
-- Google AI API Key (Gemini 2.5 model)
+- Gemini API Key
 
 ## Installation
 
