@@ -19,7 +19,7 @@
 
 ## 系统要求
 
-- Python 3.8+
+- Python 3.10+
 - FFmpeg (用于视频处理)
 - 必要的 Python 库 (见安装部分)
 - Google AI API 密钥 (Gemini 2.5 模型)
