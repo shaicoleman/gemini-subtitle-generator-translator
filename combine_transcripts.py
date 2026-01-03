@@ -171,7 +171,7 @@ def generate_srt(transcript_dir, audio_dir, output_srt_file, content_choice='bot
     try:
         audio_files = sorted(
             [f for f in os.listdir(audio_dir) if f.lower().endswith(SUPPORTED_AUDIO_EXTENSIONS)],
-            key=lambda x: int(re.findall(r'\d+', x)[-1]) if re.findall(r'\d+', x) else 0
+            key=lambda x: int(re.findall(r'\d+', pathlib.Path(x).stem)[-1]) if re.findall(r'\d+', pathlib.Path(x).stem) else 0
         )
     except Exception as e:
         if progress_queue: progress_queue.put(f"Error listing audio files: {e}")

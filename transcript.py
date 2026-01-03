@@ -1,4 +1,5 @@
 import os
+import re
 from google import genai
 from google.genai import types
 import time
@@ -127,7 +128,10 @@ def run_transcription(api_key, audio_dir, intermediate_dir, system_instruction, 
     pathlib.Path(intermediate_dir).mkdir(parents=True, exist_ok=True)
     
     try:
-        audio_files = sorted([os.path.join(audio_dir, f) for f in os.listdir(audio_dir) if f.lower().endswith(SUPPORTED_AUDIO_EXTENSIONS)])
+        audio_files = sorted(
+            [os.path.join(audio_dir, f) for f in os.listdir(audio_dir) if f.lower().endswith(SUPPORTED_AUDIO_EXTENSIONS)],
+            key=lambda x: int(re.findall(r'\d+', pathlib.Path(x).stem)[-1]) if re.findall(r'\d+', pathlib.Path(x).stem) else 0
+        )
     except FileNotFoundError:
         if progress_queue: progress_queue.put(f"Error: Audio directory not found at {audio_dir}")
         return False
