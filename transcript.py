@@ -29,11 +29,13 @@ Task:
 **CRITICAL FORMATTING RULES:**
 * You MUST provide timestamps at the start of every segment in the format **[MM:SS.ms]** (Minutes:Seconds.Milliseconds).
 * Example: [00:05.123] This is the first sentence.
+* Keep each timestamped line under 80 characters. If a sentence is longer, split it at natural pauses (commas, conjunctions, clauses) into multiple timestamped lines.
 * Do NOT use (MM:SS) or [MM:SS]. You MUST include milliseconds.
 * Output exactly four sections separated by blank lines.
-* Output the transcript and translation as it is
-* Extract the text/subtitle that appear on the video as it is. 
-* Use strikethrough if you found explicit text, translation accuracy are priority so don't replace or censor it, instead `̶S̶t̶r̶i̶k̶e̶-̶t̶h̶r̶o̶u̶g̶h̶ it`
+* Output the transcript and translation as is.
+* Do not include filler pauses (umm, uhh, err, ahh).
+* Extract the text/subtitle that appear on the video as it is.
+* Do not censor explicit language.
 
 **Strict Output Template:**
 Transcript:
