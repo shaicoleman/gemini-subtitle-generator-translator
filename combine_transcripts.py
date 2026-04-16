@@ -16,8 +16,8 @@ except ImportError:
 
 # --- Configuration ---
 # Rules for subtitle duration
-MIN_DURATION_SEC = 1.5   
-MAX_DURATION_SEC = 7.0   
+MIN_DURATION_SEC = 1.0
+MAX_DURATION_SEC = 10.0
 CHARS_PER_SECOND = 14    
 GAP_BETWEEN_SUBS = 0.05  
 # ---------------------
