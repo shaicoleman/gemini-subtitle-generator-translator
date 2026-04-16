@@ -165,7 +165,7 @@ class AudioProcessorGUI(tk.Tk):
         self.api_key = tk.StringVar()
         self.content_choice = tk.StringVar(value="both")
         self.target_language = tk.StringVar(value="English")
-        self.max_chunk_length = tk.IntVar(value=300)
+        self.max_chunk_length = tk.IntVar(value=60)
         self.silence_length = tk.DoubleVar(value=0.5)
         self.silence_threshold = tk.IntVar(value=-40)
         self.first_chunk_offset = tk.DoubleVar(value=0.0)
@@ -290,7 +290,7 @@ class AudioProcessorGUI(tk.Tk):
         # Audio splitting parameters
         self.ui_elements["max_chunk_length_label"] = ttk.Label(params_frame)
         self.ui_elements["max_chunk_length_label"].grid(row=3, column=0, sticky=tk.W, pady=5)
-        ttk.Spinbox(params_frame, from_=60, to=900, increment=30, textvariable=self.max_chunk_length, width=5).grid(row=3, column=1, sticky=tk.W, pady=5)
+        ttk.Spinbox(params_frame, from_=30, to=900, increment=30, textvariable=self.max_chunk_length, width=5).grid(row=3, column=1, sticky=tk.W, pady=5)
         
         self.ui_elements["silence_length_label"] = ttk.Label(params_frame)
         self.ui_elements["silence_length_label"].grid(row=4, column=0, sticky=tk.W, pady=5)

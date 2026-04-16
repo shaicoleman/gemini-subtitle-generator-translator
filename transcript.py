@@ -154,12 +154,17 @@ def run_transcription(api_key, audio_dir, intermediate_dir, system_instruction, 
         if progress_queue: progress_queue.put(message)
         print(message)
 
+    def is_valid_transcript_text(content):
+        # A transcript is valid if it contains the expected section marker.
+        # The failure path writes a single-line "Error processing ..." string,
+        # which has no such marker, so that case is covered too.
+        return "timestamped transcript:" in content.lower()
+
     def is_valid_transcript(filepath):
         if not os.path.exists(filepath) or os.path.getsize(filepath) == 0:
             return False
         with open(filepath, 'r', encoding='utf-8') as f:
-            content = f.read().lower()
-            return "error" not in content and "timestamped transcript:" in content
+            return is_valid_transcript_text(f.read())
 
     def process_file_wrapper(filepath):
         nonlocal processed_count, success_count, skipped_count
@@ -178,7 +183,7 @@ def run_transcription(api_key, audio_dir, intermediate_dir, system_instruction, 
         
         with count_lock:
             processed_count += 1
-            if result and "error" not in result.lower():
+            if result and is_valid_transcript_text(result):
                 success_count += 1
                 status = "Success"
             else:

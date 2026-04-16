@@ -12,7 +12,7 @@ import threading
 
 # --- Configuration ---
 OUTPUT_DIR = "audio_chunks"
-MAX_CHUNK_LENGTH = 5 * 60  # 5 minutes
+MAX_CHUNK_LENGTH = 60  # 1 minute
 MIN_SILENCE_LENGTH = 0.5
 SILENCE_THRESH_DB = -40
 SKIP_SILENCE_LENGTH = 5.0
