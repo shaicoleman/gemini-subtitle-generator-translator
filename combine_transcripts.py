@@ -242,12 +242,11 @@ def generate_srt(transcript_dir, audio_dir, output_srt_file, content_choice='bot
                     else:
                         constraint_time = global_offset + duration
 
-                    if ideal_end < constraint_time:
-                        global_end = ideal_end
-                    else:
-                        global_end = constraint_time
+                    global_end = min(ideal_end, constraint_time)
 
-                    if global_end <= global_start:
+                    # Enforce minimum display time even if it overlaps the next
+                    # subtitle — a sub-readable duration is worse than a brief overlap.
+                    if global_end - global_start < MIN_DURATION_SEC:
                         global_end = global_start + MIN_DURATION_SEC
 
                     all_srt_entries.append({'start': global_start, 'end': global_end, 'text': text})

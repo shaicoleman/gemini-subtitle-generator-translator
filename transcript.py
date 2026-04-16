@@ -38,6 +38,7 @@ Task:
 * Output exactly four sections separated by blank lines.
 * Output the transcript and translation as is.
 {extract_video_text_instruction}* Do not include filler pauses (umm, uhh, err, ahh).
+* Skip unclear or silent sections. Do not invent content to fill gaps.
 * Do not censor explicit language.
 
 **Strict Output Template:**
