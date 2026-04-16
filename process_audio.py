@@ -89,8 +89,9 @@ def run_pipeline(params, progress_queue=None, control_queue=None):
     content = params.get('content', 'both')
     first_chunk_offset = params.get('first_chunk_offset', 0.0)
     max_chunk_length = params.get('max_chunk_length', 300)
-    silence_length = params.get('silence_length', 500)
+    silence_length = params.get('silence_length', 0.5)
     silence_threshold = params.get('silence_threshold', -40)
+    skip_silence_length = params.get('skip_silence_length', 5.0)
     cleanup = params.get('cleanup', False)
     target_language = params.get('target_language', 'English')
     model_name = params.get('model_name', 'gemini-3-flash-preview')
@@ -101,7 +102,7 @@ def run_pipeline(params, progress_queue=None, control_queue=None):
     audio_stream = params.get('audio_stream', 0)
 
     if not input_file or not os.path.isfile(input_file):
-        error_msg = f"Error: Input file '{input_file}' does not exist."
+        error_msg = f"Error: Input file '{input_file}' does not exist (expected at '{os.path.abspath(input_file)}')."
         if progress_queue: progress_queue.put(error_msg)
         print(error_msg)
         return False
@@ -158,11 +159,13 @@ def run_pipeline(params, progress_queue=None, control_queue=None):
         step1_start = time.time()
         try:
             chunk_files = split_audio(
-                input_audio, 
-                audio_chunk_dir, 
-                max_chunk_length=max_chunk_length * 1000,
+                input_audio,
+                audio_chunk_dir,
+                max_chunk_length=max_chunk_length,
                 min_silence_len=silence_length,
                 silence_thresh=silence_threshold,
+                skip_silence_length=skip_silence_length,
+                max_workers=max_workers,
                 progress_queue=progress_queue
             )
             
@@ -282,8 +285,9 @@ def main():
     parser.add_argument("--target-language", default="English", help="Target language for translation (default: English)")
     parser.add_argument("--content", choices=['transcript', 'translation', 'both'], default='both', help="Output content type (default: both)")
     parser.add_argument("--max-chunk-length", type=int, default=300, help="Maximum audio chunk length in seconds (default: 300)")
-    parser.add_argument("--silence-length", type=int, default=500, help="Minimum silence length in ms for splitting (default: 500)")
+    parser.add_argument("--silence-length", type=float, default=0.5, help="Minimum silence length in seconds for splitting (default: 0.5)")
     parser.add_argument("--silence-threshold", type=int, default=-40, help="Silence threshold in dB (default: -40)")
+    parser.add_argument("--skip-silence-length", type=float, default=5.0, help="Skip silences longer than this many seconds from transcription (default: 5.0, set very high to disable)")
     parser.add_argument("--first-chunk-offset", type=float, default=0.0, help="Time offset for first chunk in seconds (default: 0.0)")
     parser.add_argument("--model-name", default="gemini-3-flash-preview", help="Gemini model to use (default: gemini-3-flash-preview)")
     parser.add_argument("--skip-split", action="store_true", help="Skip audio splitting step")

@@ -39,7 +39,7 @@ translations = {
         "content_desc": "(transcript: Transcription only, translation: Translation only, both: Both)",
         "target_language": "Target Translation Language:",
         "max_chunk_length": "Max Chunk Length (sec):",
-        "silence_length": "Silence Detection Length (ms):",
+        "silence_length": "Silence Detection Length (sec):",
         "silence_threshold": "Silence Threshold (dB):",
         "first_chunk_offset": "First Segment Offset (sec):",
         "cleanup": "Delete intermediate files after processing",
@@ -100,7 +100,7 @@ translations = {
         "content_desc": "(transcript:仅转录, translation:仅翻译, both:两者)",
         "target_language": "翻译目标语言:",
         "max_chunk_length": "最大片段长度(秒):",
-        "silence_length": "静音检测长度(毫秒):",
+        "silence_length": "静音检测长度(秒):",
         "silence_threshold": "静音阈值(dB):",
         "first_chunk_offset": "首个片段偏移(秒):",
         "cleanup": "处理完成后删除中间文件",
@@ -166,7 +166,7 @@ class AudioProcessorGUI(tk.Tk):
         self.content_choice = tk.StringVar(value="both")
         self.target_language = tk.StringVar(value="English")
         self.max_chunk_length = tk.IntVar(value=300)
-        self.silence_length = tk.IntVar(value=500)
+        self.silence_length = tk.DoubleVar(value=0.5)
         self.silence_threshold = tk.IntVar(value=-40)
         self.first_chunk_offset = tk.DoubleVar(value=0.0)
         self.cleanup = tk.BooleanVar(value=False)
@@ -294,7 +294,7 @@ class AudioProcessorGUI(tk.Tk):
         
         self.ui_elements["silence_length_label"] = ttk.Label(params_frame)
         self.ui_elements["silence_length_label"].grid(row=4, column=0, sticky=tk.W, pady=5)
-        ttk.Spinbox(params_frame, from_=100, to=2000, increment=100, textvariable=self.silence_length, width=5).grid(row=4, column=1, sticky=tk.W, pady=5)
+        ttk.Spinbox(params_frame, from_=0.1, to=2.0, increment=0.1, textvariable=self.silence_length, width=5).grid(row=4, column=1, sticky=tk.W, pady=5)
         
         self.ui_elements["silence_threshold_label"] = ttk.Label(params_frame)
         self.ui_elements["silence_threshold_label"].grid(row=5, column=0, sticky=tk.W, pady=5)

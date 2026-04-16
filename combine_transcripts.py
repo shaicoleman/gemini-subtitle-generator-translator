@@ -1,5 +1,6 @@
 import os
 import re
+import json
 import datetime
 import pathlib
 import sys
@@ -181,36 +182,58 @@ def generate_srt(transcript_dir, audio_dir, output_srt_file, content_choice='bot
         if progress_queue: progress_queue.put("No audio chunks found.")
         return False
 
-    global_offset = first_chunk_offset
+    # Load chunk metadata if present — lets us honor skipped silences and rely on
+    # source-time offsets rather than accumulating file durations.
+    metadata_path = os.path.join(audio_dir, "chunks_metadata.json")
+    source_start_by_file = {}
+    if os.path.exists(metadata_path):
+        try:
+            with open(metadata_path, 'r', encoding='utf-8') as f:
+                meta = json.load(f)
+            for entry in meta.get("chunks", []):
+                source_start_by_file[entry["file"]] = float(entry["source_start"])
+            if progress_queue:
+                progress_queue.put(f"Loaded chunk metadata ({len(source_start_by_file)} entries)")
+        except Exception as e:
+            if progress_queue:
+                progress_queue.put(f"Warning: could not read chunk metadata: {e}")
+            source_start_by_file = {}
+
+    cumulative_offset = first_chunk_offset
     all_srt_entries = []
-    
+
     # 2. Iterate
     for i, audio_filename in enumerate(audio_files):
         if progress_queue and i % 5 == 0:
             progress_queue.put(f"Merging chunk {i+1}/{len(audio_files)}...")
-            
+
         audio_path = os.path.join(audio_dir, audio_filename)
         duration = get_audio_duration(audio_path)
-        
+
+        if audio_filename in source_start_by_file:
+            global_offset = first_chunk_offset + source_start_by_file[audio_filename]
+        else:
+            global_offset = cumulative_offset
+
         transcript_filename = pathlib.Path(audio_filename).stem + ".txt"
         transcript_path = os.path.join(transcript_dir, transcript_filename)
-        
+
         if os.path.exists(transcript_path):
             try:
                 with open(transcript_path, 'r', encoding='utf-8', errors='ignore') as f:
                     text_content = f.read()
-                
+
                 # Pass user choice to extract ONLY that section
                 local_segments = extract_segments(text_content, content_choice, filename=transcript_filename)
-                
+
                 for j, (start_sec, text) in enumerate(local_segments):
                     global_start = global_offset + start_sec
-                    
+
                     # Duration Logic
                     ideal_duration = (len(text) / CHARS_PER_SECOND) + 1.0
                     ideal_duration = max(MIN_DURATION_SEC, min(ideal_duration, MAX_DURATION_SEC))
                     ideal_end = global_start + ideal_duration
-                    
+
                     # Constraint Logic
                     constraint_time = None
                     if j < len(local_segments) - 1:
@@ -228,11 +251,11 @@ def generate_srt(transcript_dir, audio_dir, output_srt_file, content_choice='bot
                         global_end = global_start + MIN_DURATION_SEC
 
                     all_srt_entries.append({'start': global_start, 'end': global_end, 'text': text})
-                    
+
             except Exception as e:
                 print(f"Error parsing {transcript_filename}: {e}")
-        
-        global_offset += duration
+
+        cumulative_offset += duration
 
     # 3. Write
     if not all_srt_entries:

@@ -15,7 +15,7 @@ INTERMEDIATE_DIR = "intermediate_transcripts"
 MAX_RETRIES = 5
 INITIAL_DELAY = 2
 DEFAULT_MODEL = "gemini-3-flash-preview"
-DEFAULT_MAX_WORKERS = 5
+DEFAULT_MAX_WORKERS = 8
 SUPPORTED_AUDIO_EXTENSIONS = ('.mp3', '.wav', '.aiff', '.aif', '.aac', '.m4a', '.ogg', '.flac')
 # ---------------------
 
