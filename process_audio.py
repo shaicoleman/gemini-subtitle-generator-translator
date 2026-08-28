@@ -25,8 +25,8 @@ def is_video_file(filepath):
     _, ext = os.path.splitext(filepath)
     return ext.lower() in video_extensions
 
-def convert_video_to_mp3(video_path, output_dir=None, progress_queue=None, audio_stream=0):
-    """Converts a video file to an MP3 audio file using ffmpeg."""
+def convert_video_to_flac(video_path, output_dir=None, progress_queue=None, audio_stream=0):
+    """Extracts a video's audio as 16 kHz mono FLAC using ffmpeg."""
     if not os.path.isfile(video_path):
         error_msg = f"Error: Input video file '{video_path}' not found."
         if progress_queue: progress_queue.put(error_msg)
@@ -40,15 +40,19 @@ def convert_video_to_mp3(video_path, output_dir=None, progress_queue=None, audio
     else:
         pathlib.Path(output_dir).mkdir(parents=True, exist_ok=True)
     
-    mp3_filename = f"{video_path_obj.stem}.mp3"
-    mp3_path = os.path.join(output_dir, mp3_filename)
+    flac_filename = f"{video_path_obj.stem}.flac"
+    flac_path = os.path.join(output_dir, flac_filename)
     
-    status_msg = f"Converting video to MP3: {video_path} -> {mp3_path}"
+    status_msg = f"Extracting video audio as FLAC: {video_path} -> {flac_path}"
     if progress_queue: progress_queue.put(status_msg)
     print(status_msg)
     
     try:
-        cmd = ["ffmpeg", "-i", video_path, "-q:a", "0", "-map", f"0:a:{audio_stream}", "-vn", mp3_path, "-y"]
+        cmd = [
+            "ffmpeg", "-i", video_path, "-map", f"0:a:{audio_stream}", "-vn",
+            "-ar", "16000", "-ac", "1", "-c:a", "flac",
+            "-sample_fmt", "s16", flac_path, "-y"
+        ]
         if sys.platform == 'win32':
              creation_flags = subprocess.CREATE_NO_WINDOW
         else:
@@ -70,10 +74,10 @@ def convert_video_to_mp3(video_path, output_dir=None, progress_queue=None, audio
             print(error_msg)
             return None
         
-        success_msg = f"Video successfully converted to MP3: {mp3_path}"
+        success_msg = f"Video audio successfully extracted as FLAC: {flac_path}"
         if progress_queue: progress_queue.put(success_msg)
         print(success_msg)
-        return mp3_path
+        return flac_path
     
     except Exception as e:
         error_msg = f"An error occurred during video conversion: {str(e)}"
@@ -124,22 +128,22 @@ def run_pipeline(params, progress_queue=None, control_queue=None):
     
     # Video Conversion
     if is_video_file(input_file):
-        start_msg = "\n--- Pre-processing: Video to MP3 ---"
+        start_msg = "\n--- Pre-processing: Video Audio to FLAC ---"
         if progress_queue: progress_queue.put(start_msg)
         print(start_msg)
         
         convert_start = time.time()
-        mp3_path = convert_video_to_mp3(input_file, output_dir, progress_queue, audio_stream)
+        flac_path = convert_video_to_flac(input_file, output_dir, progress_queue, audio_stream)
         
-        if not mp3_path or not os.path.isfile(mp3_path):
-            error_msg = "Error: Video to MP3 conversion failed. Cannot continue."
+        if not flac_path or not os.path.isfile(flac_path):
+            error_msg = "Error: Video audio extraction to FLAC failed. Cannot continue."
             if progress_queue: progress_queue.put(error_msg)
             print(error_msg)
             return False
         
-        input_audio = mp3_path
+        input_audio = flac_path
         convert_end = time.time()
-        if progress_queue: progress_queue.put(f"Video to MP3 conversion complete ({convert_end - convert_start:.2f}s)")
+        if progress_queue: progress_queue.put(f"Video audio extraction to FLAC complete ({convert_end - convert_start:.2f}s)")
     
     if skip_split and audio_chunks_dir and os.path.isdir(audio_chunks_dir):
         audio_chunk_dir = audio_chunks_dir

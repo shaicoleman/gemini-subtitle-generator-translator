@@ -41,7 +41,7 @@ def main():
     parser.add_argument("--original-file", required=True, help="Path to the original audio file.")
     parser.add_argument("--chunk-dir", required=True, help="Directory containing the audio chunks.")
     parser.add_argument("--chunk-prefix", default="chunk_", help="Prefix for chunk filenames (default: chunk_).")
-    parser.add_argument("--chunk-ext", default=".mp3", help="Extension for chunk files (default: .mp3).")
+    parser.add_argument("--chunk-ext", default=".flac", help="Extension for chunk files (default: .flac).")
     args = parser.parse_args()
 
     print(f"Getting duration of original file: {args.original_file}")

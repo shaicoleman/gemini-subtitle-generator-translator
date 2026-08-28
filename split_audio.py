@@ -128,8 +128,7 @@ def split_audio(input_file, output_dir, max_chunk_length=MAX_CHUNK_LENGTH,
                 skip_silence_length=SKIP_SILENCE_LENGTH, max_workers=DEFAULT_MAX_WORKERS,
                 progress_queue=None):
     """
-    Splits an audio file into chunks using ffmpeg.
-    automatically handles re-encoding if input is not mp3.
+    Splits an audio file into 16 kHz mono FLAC chunks using ffmpeg.
     """
     pathlib.Path(output_dir).mkdir(parents=True, exist_ok=True)
 
@@ -152,35 +151,11 @@ def split_audio(input_file, output_dir, max_chunk_length=MAX_CHUNK_LENGTH,
             f"Skipping {skipped_total:.1f}s of silence (>= {skip_silence_length}s gaps)"
         )
 
-    # Check input extension to decide encoding strategy
-    # Gemini supports: WAV, MP3, AIFF, AAC, OGG, FLAC
-    _, ext = os.path.splitext(input_file)
-    ext_lower = ext.lower()
-
-    # Map extensions to their output format and whether stream copy is possible
-    supported_formats = {
-        '.mp3': ('mp3', True),
-        '.wav': ('wav', True),
-        '.aiff': ('aiff', True),
-        '.aif': ('aiff', True),
-        '.aac': ('aac', True),
-        '.m4a': ('m4a', True),  # AAC in M4A container
-        '.ogg': ('ogg', True),
-        '.flac': ('flac', True),
-    }
-
-    if ext_lower in supported_formats:
-        output_ext, can_stream_copy = supported_formats[ext_lower]
-    else:
-        output_ext, can_stream_copy = 'mp3', False
-
-    # Use stream copy for supported formats, re-encode otherwise
-    if can_stream_copy:
-        codec_args = ['-c', 'copy']
-    else:
-        # Re-encode to standard MP3 (compatible with Gemini)
-        # -vn (no video), -ar 44100 (sample rate), -ac 2 (stereo), -b:a 192k (bitrate)
-        codec_args = ['-vn', '-ar', '44100', '-ac', '2', '-b:a', '192k']
+    output_ext = 'flac'
+    codec_args = [
+        '-vn', '-ar', '16000', '-ac', '1',
+        '-c:a', 'flac', '-sample_fmt', 's16'
+    ]
 
     if sys.platform == 'win32':
         creation_flags = subprocess.CREATE_NO_WINDOW
