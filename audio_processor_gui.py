@@ -16,7 +16,8 @@ from datetime import datetime
 
 # Import processing functions and video detection from the main script
 try:
-    from process_audio import run_pipeline, is_video_file, DEFAULT_MAX_WORKERS
+    from process_audio import DEFAULT_MAX_WORKERS, is_video_file, run_pipeline
+    from transcript import DEFAULT_MODEL, SUPPORTED_MODELS
 except ImportError as e:
     print(f"Error: Unable to import the process_audio.py module. Ensure the file is in the same directory. Details: {e}")
     sys.exit(1)
@@ -27,7 +28,7 @@ if __name__ == "__main__":
 # Define the translation dictionary
 translations = {
     "en_US": {
-        "title": "Audio/Video Transcription (Gemini 3.0)",
+        "title": "Audio/Video Transcription (Gemini)",
         "basic_settings": "Basic Settings",
         "input_file": "Input File (Audio/Video):",
         "browse": "Browse...",
@@ -88,7 +89,7 @@ translations = {
         "dir_not_exist_prompt": "The default audio chunks directory '{dir}' does not exist.\nDo you want to use this path anyway?"
     },
     "zh_CN": {
-        "title": "音频/视频转录与字幕生成工具 (Gemini 3.0)",
+        "title": "音频/视频转录与字幕生成工具 (Gemini)",
         "basic_settings": "基本设置",
         "input_file": "输入文件(音频/视频):",
         "browse": "浏览...",
@@ -170,7 +171,7 @@ class AudioProcessorGUI(tk.Tk):
         self.silence_threshold = tk.IntVar(value=-40)
         self.first_chunk_offset = tk.DoubleVar(value=0.0)
         self.cleanup = tk.BooleanVar(value=False)
-        self.model_name = tk.StringVar(value="gemini-3-flash-preview")
+        self.model_name = tk.StringVar(value=DEFAULT_MODEL)
         self.skip_split = tk.BooleanVar(value=False)
         self.audio_chunks_dir = tk.StringVar()
         self.max_workers = tk.IntVar(value=DEFAULT_MAX_WORKERS)
@@ -274,9 +275,8 @@ class AudioProcessorGUI(tk.Tk):
         self.ui_elements["model_label"].grid(row=1, column=2, sticky=tk.W, pady=5, padx=(10, 0))
         model_combo = ttk.Combobox(params_frame, textvariable=self.model_name, width=22)
         
-        # Updated Model List for Gemini 3.0
-        model_combo['values'] = ('gemini-3-flash-preview', 'gemini-3-pro-preview', 'gemini-2.5-flash')
-        model_combo.current(0) # Default to gemini-3-flash-preview
+        model_combo['values'] = SUPPORTED_MODELS
+        model_combo.current(0)
         
         model_combo.grid(row=1, column=3, sticky=tk.W, pady=5)
         self.ui_elements["model_combo"] = model_combo

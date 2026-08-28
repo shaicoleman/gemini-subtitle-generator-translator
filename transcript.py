@@ -14,7 +14,13 @@ AUDIO_DIR = "audio_chunks"
 INTERMEDIATE_DIR = "intermediate_transcripts"
 MAX_RETRIES = 5
 INITIAL_DELAY = 2
-DEFAULT_MODEL = "gemini-3-flash-preview"
+DEFAULT_MODEL = "gemini-3.5-transcribe"
+SUPPORTED_MODELS = (
+    DEFAULT_MODEL,
+    "gemini-3-flash-preview",
+    "gemini-3-pro-preview",
+    "gemini-2.5-flash",
+)
 DEFAULT_MAX_WORKERS = 8
 SUPPORTED_AUDIO_EXTENSIONS = ('.mp3', '.wav', '.aiff', '.aif', '.aac', '.m4a', '.ogg', '.flac')
 # ---------------------
@@ -24,7 +30,7 @@ def get_system_instruction(target_language="English", content_choice="both"):
     extract_video_text_instruction = ""
     if include_translation:
         extract_video_text_instruction = "* Extract the text/subtitle that appear on the video as it is.\n"
-    return f"""You are an expert transcription engine powered by Gemini 3.0.
+    return f"""You are an expert transcription engine powered by Gemini.
 Task:
 1.  **Transcribe** the audio verbatim in its original language.
 2.  **Translate** the transcript into {target_language} (if the audio is not already in that language).
@@ -100,7 +106,7 @@ def process_audio_file(filepath, intermediate_dir, system_instruction, model_nam
                 config=generation_config
             )
 
-            # Handle potential "thinking" blocks in Gemini 3.0 if present, though .text usually extracts the final answer
+            # .text extracts the final answer when the response contains thinking blocks.
             transcript = response.text
 
             with open(intermediate_filepath, "w", encoding="utf-8") as f:

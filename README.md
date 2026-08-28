@@ -106,7 +106,7 @@ python process_audio.py speech.mp3 --api-key YOUR_API_KEY --output-dir ./output_
   - `transcript`: Transcription only
   - `translation`: Translation only
   - `both`: Both transcription and translation (default)
-- `--model-name`: Gemini model to use for transcription (default: gemini-3-flash-preview)
+- `--model-name`: Gemini model to use for transcription (default: `gemini-3.5-transcribe`; also available: `gemini-3-flash-preview`, `gemini-3-pro-preview`, and `gemini-2.5-flash`)
 - `--max-length`: Maximum audio segment length (seconds, default 300)
 - `--silence-length`: Minimum length for silence detection (milliseconds, default 500)
 - `--silence-threshold`: Silence detection threshold (dB, default -40)

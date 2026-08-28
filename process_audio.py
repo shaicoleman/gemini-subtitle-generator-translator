@@ -13,7 +13,7 @@ from datetime import datetime
 
 try:
     from split_audio import split_audio
-    from transcript import run_transcription, DEFAULT_MAX_WORKERS
+    from transcript import DEFAULT_MAX_WORKERS, DEFAULT_MODEL, run_transcription
     from combine_transcripts import generate_srt
 except ImportError as e:
     print(f"Error: Could not import script modules. Ensure split_audio.py, transcript.py, and combine_transcripts.py are in the same directory. Details: {e}")
@@ -94,7 +94,7 @@ def run_pipeline(params, progress_queue=None, control_queue=None):
     skip_silence_length = params.get('skip_silence_length', 5.0)
     cleanup = params.get('cleanup', False)
     target_language = params.get('target_language', 'English')
-    model_name = params.get('model_name', 'gemini-3-flash-preview')
+    model_name = params.get('model_name', DEFAULT_MODEL)
     skip_split = params.get('skip_split', False)
     audio_chunks_dir = params.get('audio_chunks_dir', None)
     max_workers = params.get('max_workers', DEFAULT_MAX_WORKERS)
@@ -289,7 +289,7 @@ def main():
     parser.add_argument("--silence-threshold", type=int, default=-40, help="Silence threshold in dB (default: -40)")
     parser.add_argument("--skip-silence-length", type=float, default=5.0, help="Skip silences longer than this many seconds from transcription (default: 5.0, set very high to disable)")
     parser.add_argument("--first-chunk-offset", type=float, default=0.0, help="Time offset for first chunk in seconds (default: 0.0)")
-    parser.add_argument("--model-name", default="gemini-3-flash-preview", help="Gemini model to use (default: gemini-3-flash-preview)")
+    parser.add_argument("--model-name", default=DEFAULT_MODEL, help=f"Gemini model to use (default: {DEFAULT_MODEL})")
     parser.add_argument("--skip-split", action="store_true", help="Skip audio splitting step")
     parser.add_argument("--audio-chunks-dir", help="Directory containing pre-split audio chunks")
     parser.add_argument("--max-workers", type=int, default=DEFAULT_MAX_WORKERS, help=f"Maximum parallel workers for API calls (default: {DEFAULT_MAX_WORKERS})")
